@@ -6,7 +6,7 @@
 #    By: rmakoni <rmakoni@student.42heilbronn.de    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/30 15:00:13 by rmakoni           #+#    #+#              #
-#    Updated: 2025/07/30 15:02:09 by rmakoni          ###   ########.fr        #
+#    Updated: 2025/07/30 22:22:53 by rmakoni          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -25,6 +25,11 @@ COMPOSE_FILE = srcs/docker-compose.yml
 
 # Default target
 all: up
+
+# Environment setup (detects WSL vs Linux and configures hosts file)
+setup:
+	@chmod +x setup.sh
+	@./setup.sh
 
 # Build and start all containers
 up:
@@ -80,6 +85,7 @@ restart:
 # View help
 help:
 	@echo "$(GREEN)Available targets:$(NC)"
+	@echo "  $(YELLOW)setup$(NC)       - Auto-detect environment and configure hosts file"
 	@echo "  $(YELLOW)up$(NC)          - Build and start all containers"
 	@echo "  $(YELLOW)down$(NC)        - Stop all containers"
 	@echo "  $(YELLOW)clean$(NC)       - Stop and remove containers, volumes, and images"
@@ -93,4 +99,4 @@ help:
 	@echo "  $(YELLOW)help$(NC)        - Show this help message"
 
 # Declare phony targets
-.PHONY: all up down clean fclean re ps logs logs-service logs-follow shell restart help
+.PHONY: all setup up down clean fclean re ps logs logs-service logs-follow shell restart help

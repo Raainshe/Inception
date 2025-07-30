@@ -1,3 +1,12 @@
+# HTTP server block - redirects to HTTPS
+server {
+	listen 80;
+	listen [::]:80;
+	server_name www.rmakoni.42.fr rmakoni.42.fr localhost;
+	return 301 https://$server_name$request_uri;
+}
+
+# HTTPS server block
 server {
 
 # The server listens for incoming connections on port 443, which is the default port for HTTPS traffic. The server listens for both IPv4 and IPv6 connections
@@ -5,7 +14,7 @@ server {
 	listen [::]:443 ssl;
 
 # replace login with your own loggin
-	server_name www.rmakoni.42.fr rmakoni.42.fr;
+	server_name www.rmakoni.42.fr rmakoni.42.fr localhost;
 
 # The ssl_certificate and ssl_certificate_key directives specify the locations of the SSL/TLS certificate and private key, respectively, that will be used to encrypt the traffic. The ssl_protocols directive specifies the TLS protocols that the server should support.
 	ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;

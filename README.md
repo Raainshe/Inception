@@ -125,16 +125,26 @@ A complete **LEMP stack** (Linux, NGINX, MariaDB, PHP) containerized with **Dock
    cd Inception
    ```
 
-2. **Start the application**
+2. **Environment setup (automatic)**
+   ```bash
+   make setup
+   ```
+   This script automatically:
+   - Detects if you're in WSL or standard Linux
+   - Configures the appropriate hosts file(s)
+   - Sets up domain resolution for your environment
+
+3. **Start the application**
    ```bash
    make
    ```
 
-3. **Access your site**
-   - Open your browser and go to: **https://rmakoni.42.fr**
+4. **Access your site**
+   - **WSL Development**: `https://localhost` or `https://rmakoni.42.fr`
+   - **Linux Deployment**: `https://rmakoni.42.fr`
    - Accept the SSL certificate warning (self-signed certificate)
 
-That's it! Your complete web stack is now running.
+That's it! Your complete web stack is now running in any environment.
 
 ## 📁 Project Structure
 
@@ -188,6 +198,7 @@ To access the site locally, the domain is automatically added to your `/etc/host
 
 | Command | Description |
 |---------|-------------|
+| `make setup` | 🔧 Auto-detect environment and configure hosts file |
 | `make` or `make up` | 🚀 Build and start all containers |
 | `make down` | ⏹️ Stop all containers |
 | `make clean` | 🧹 Stop and remove containers, volumes, and images |
@@ -287,6 +298,31 @@ This will remove:
 - All custom images
 - All networks
 - Docker build cache
+
+## 🌐 Environment Compatibility
+
+### **🖥️ Development Environments**
+This project works seamlessly in multiple environments:
+
+- **✅ WSL2** (Windows Subsystem for Linux)
+- **✅ Native Linux** (Ubuntu, Debian, etc.)
+- **✅ macOS** (with Docker Desktop)
+- **✅ Docker Desktop** on any platform
+
+### **🔧 Automatic Environment Detection**
+The `make setup` command automatically:
+- Detects your environment (WSL vs Linux)
+- Configures the correct hosts file(s)
+- Sets up domain resolution appropriately
+- Provides environment-specific access instructions
+
+### **🎯 Access Methods by Environment**
+
+| Environment | Primary Access | Alternative |
+|------------|----------------|-------------|
+| **WSL Development** | `https://localhost` | `https://rmakoni.42.fr` |
+| **Linux Deployment** | `https://rmakoni.42.fr` | `https://localhost` |
+| **42 School Evaluation** | `https://rmakoni.42.fr` | N/A |
 
 ## ⚠️ Troubleshooting
 
