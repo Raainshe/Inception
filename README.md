@@ -121,7 +121,7 @@ A complete **LEMP stack** (Linux, NGINX, MariaDB, PHP) containerized with **Dock
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/Raainshe/Inception.git
    cd Inception
    ```
 
