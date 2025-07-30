@@ -139,8 +139,18 @@ A complete **LEMP stack** (Linux, NGINX, MariaDB, PHP) containerized with **Dock
    make
    ```
 
-4. **Access your site**
-   - **WSL Development**: `https://localhost` or `https://rmakoni.42.fr`
+4. **WSL Users: Additional Step Required**
+   If you're using WSL, you need to manually add the domain to Windows hosts file:
+   
+   **Run this in PowerShell as Administrator on Windows:**
+   ```powershell
+   Add-Content -Path "C:\Windows\System32\drivers\etc\hosts" -Value "`n127.0.0.1 rmakoni.42.fr www.rmakoni.42.fr"
+   ```
+   
+   This is required because the setup script cannot modify Windows hosts file due to permissions.
+
+5. **Access your site**
+   - **WSL Development**: `https://localhost` or `https://rmakoni.42.fr` (after step 4)
    - **Linux Deployment**: `https://rmakoni.42.fr`
    - Accept the SSL certificate warning (self-signed certificate)
 
@@ -356,6 +366,23 @@ make logs-service SERVICE=mariadb
 
 # Restart MariaDB service
 make restart SERVICE=mariadb
+```
+
+**🔴 Cannot Access https://rmakoni.42.fr**
+
+**For Linux:**
+```bash
+# Check if domain is in hosts file
+grep "rmakoni.42.fr" /etc/hosts
+
+# If missing, add it:
+echo "127.0.0.1 rmakoni.42.fr www.rmakoni.42.fr" | sudo tee -a /etc/hosts
+```
+
+**For WSL Users:**
+The domain must be added to **Windows** hosts file (not just Linux). Run this in **PowerShell as Administrator** on Windows:
+```powershell
+Add-Content -Path "C:\Windows\System32\drivers\etc\hosts" -Value "`n127.0.0.1 rmakoni.42.fr www.rmakoni.42.fr"
 ```
 
 **🔴 SSL Certificate Warnings**
