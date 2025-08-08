@@ -6,7 +6,7 @@
 #    By: rmakoni <rmakoni@student.42heilbronn.de    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/07/30 15:00:13 by rmakoni           #+#    #+#              #
-#    Updated: 2025/07/30 22:47:35 by rmakoni          ###   ########.fr        #
+#    Updated: 2025/08/08 14:52:47 by rmakoni          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,6 +23,16 @@ NAME = inception
 # Docker compose file path
 COMPOSE_FILE = srcs/docker-compose.yml
 
+# Detect Docker Compose command (prefer v2: `docker compose`, fallback to v1: `docker-compose`)
+COMPOSE = $(shell \
+    if docker compose version >/dev/null 2>&1; then \
+        echo "docker compose"; \
+    elif docker-compose version >/dev/null 2>&1; then \
+        echo "docker-compose"; \
+    else \
+        echo "docker compose"; \
+    fi)
+
 # Default target
 all: up
 
@@ -34,19 +44,19 @@ setup:
 # Build and start all containers
 up:
 	@echo "$(GREEN)Building and starting $(NAME) containers...$(NC)"
-	@cd srcs && docker-compose up --build -d
+	@cd srcs && $(COMPOSE) up --build -d
 	@echo "$(GREEN)$(NAME) is now running!$(NC)"
 	@echo "$(YELLOW)Access your site at: https://rmakoni.42.fr$(NC)"
 
 # Stop all containers
 down:
 	@echo "$(YELLOW)Stopping $(NAME) containers...$(NC)" 
-	@cd srcs && docker-compose down
+	@cd srcs && $(COMPOSE) down
 
 # Stop and remove containers, networks, images, and volumes
 clean:
 	@echo "$(RED)Cleaning up $(NAME) containers and volumes...$(NC)"
-	@cd srcs && docker-compose down --volumes --rmi all
+	@cd srcs && $(COMPOSE) down --volumes --rmi all
 	@docker system prune -af
 
 # Complete cleanup (following 42 conventions)
@@ -60,27 +70,27 @@ re: fclean up
 
 # Show container status
 ps:
-	@cd srcs && docker-compose ps
+	@cd srcs && $(COMPOSE) ps
 
 # View logs
 logs:
-	@cd srcs && docker-compose logs
+	@cd srcs && $(COMPOSE) logs
 
 # View logs for specific service (usage: make logs-service SERVICE=mariadb)
 logs-service:
-	@cd srcs && docker-compose logs $(SERVICE)
+	@cd srcs && $(COMPOSE) logs $(SERVICE)
 
 # Follow logs in real time
 logs-follow:
-	@cd srcs && docker-compose logs -f
+	@cd srcs && $(COMPOSE) logs -f
 
 # Open shell in container (usage: make shell SERVICE=mariadb)
 shell:
-	@cd srcs && docker-compose exec $(SERVICE) /bin/bash
+	@cd srcs && $(COMPOSE) exec $(SERVICE) /bin/bash
 
 # Restart specific service (usage: make restart SERVICE=wordpress)
 restart:
-	@cd srcs && docker-compose restart $(SERVICE)
+	@cd srcs && $(COMPOSE) restart $(SERVICE)
 
 # View help
 help:
