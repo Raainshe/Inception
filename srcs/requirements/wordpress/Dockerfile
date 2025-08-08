@@ -11,7 +11,7 @@ RUN mkdir /run/php
 RUN mkdir -p /var/www/html
 
 
-RUN sed -i 's|^listen = .*|listen = wordpress:9000|g' /etc/php/7.4/fpm/pool.d/www.conf
+RUN sed -i 's|^listen = .*|listen = 9000|g' /etc/php/7.4/fpm/pool.d/www.conf
 
 COPY ./install.sh .
 RUN chmod +x install.sh
