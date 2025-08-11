@@ -1,0 +1,200 @@
+# INCEPTION PROJECT - EVALUATION COMMANDS
+# =========================================
+
+## PRELIMINARY TESTS
+# ===================
+
+Q: Clean up all Docker resources before evaluation
+CMD: docker stop $(docker ps -qa); docker rm $(docker ps -qa); docker rmi -f $(docker images -qa); docker volume rm $(docker volume ls -q); docker network rm $(docker network ls -q) 2>/dev/null
+
+Q: Check if srcs folder exists at repository root
+CMD: ls -la srcs/
+
+Q: Check if Makefile exists at repository root  
+CMD: ls -la Makefile
+
+Q: Check docker-compose.yml for forbidden 'network: host' or 'links:'
+CMD: grep -E "(network.*host|links:)" srcs/docker-compose.yml
+
+Q: Check docker-compose.yml has networks defined
+CMD: grep -A 5 "networks:" srcs/docker-compose.yml
+
+Q: Check Makefile and scripts for forbidden '--link' flag
+CMD: grep -r "\--link" Makefile srcs/
+
+Q: Check Dockerfiles for forbidden commands (tail -f, bash, sh in background)
+CMD: grep -E "(tail -f|nginx.*&.*bash|bash.*&|sh.*&)" srcs/requirements/*/Dockerfile
+
+Q: Run the Makefile to start services
+CMD: make
+
+## MANDATORY PART
+# ===============
+
+## Simple Setup
+# -------------
+
+Q: Check NGINX is accessible only on port 443 (HTTPS)
+CMD: curl -I https://rmakoni.42.fr
+CMD: curl -I http://rmakoni.42.fr (should fail or redirect)
+
+Q: Verify SSL/TLS certificate is used
+CMD: openssl s_client -connect rmakoni.42.fr:443 -servername rmakoni.42.fr
+
+Q: Check WordPress is properly installed (no installation page)
+CMD: curl -k https://rmakoni.42.fr | grep -i "wordpress\|installation"
+
+## Docker Basics  
+# --------------
+
+Q: Check each service has its own Dockerfile
+CMD: ls -la srcs/requirements/*/Dockerfile
+
+Q: Verify Dockerfiles are not empty
+CMD: wc -l srcs/requirements/*/Dockerfile
+
+Q: Check base images are from Alpine or Debian Buster
+CMD: grep "FROM" srcs/requirements/*/Dockerfile
+
+Q: Verify Docker images have same names as services
+CMD: docker images | grep -E "(nginx|wordpress|mariadb)"
+
+Q: Check containers were built using docker-compose
+CMD: docker-compose ps
+
+## Docker Network
+# ---------------
+
+Q: Verify docker network exists
+CMD: docker network ls
+
+Q: Check network is used in docker-compose.yml
+CMD: grep -A 10 "networks:" srcs/docker-compose.yml
+
+## NGINX with SSL/TLS
+# ===================
+
+Q: Check NGINX Dockerfile exists
+CMD: ls -la srcs/requirements/nginx/Dockerfile
+
+Q: Verify NGINX container was created
+CMD: docker-compose ps | grep nginx
+
+Q: Test HTTP port 80 is not accessible
+CMD: curl -I http://rmakoni.42.fr:80 (should fail)
+
+Q: Test HTTPS access works
+CMD: curl -k -I https://rmakoni.42.fr
+
+Q: Verify TLS v1.2/v1.3 certificate
+CMD: openssl s_client -connect rmakoni.42.fr:443 -tls1_2
+CMD: openssl s_client -connect rmakoni.42.fr:443 -tls1_3
+
+## WordPress with php-fpm and Volume
+# ===================================
+
+Q: Check WordPress Dockerfile exists
+CMD: ls -la srcs/requirements/wordpress/Dockerfile
+
+Q: Verify no NGINX in WordPress Dockerfile
+CMD: grep -i nginx srcs/requirements/wordpress/Dockerfile
+
+Q: Check WordPress container was created
+CMD: docker-compose ps | grep wordpress
+
+Q: Verify WordPress volume exists and points to correct path
+CMD: docker volume ls
+CMD: docker volume inspect wordpress | grep "/home/rmakoni/data"
+
+Q: Test adding a comment as WordPress user
+CMD: # Manual test - go to https://rmakoni.42.fr and add comment
+
+Q: Test admin login (username must NOT contain 'admin' or 'Admin')
+CMD: # Manual test - login at https://rmakoni.42.fr/wp-admin
+
+Q: Test editing a page from admin dashboard
+CMD: # Manual test - edit page and verify changes appear on site
+
+## MariaDB and Volume
+# ===================
+
+Q: Check MariaDB Dockerfile exists
+CMD: ls -la srcs/requirements/mariadb/Dockerfile
+
+Q: Verify no NGINX in MariaDB Dockerfile
+CMD: grep -i nginx srcs/requirements/mariadb/Dockerfile
+
+Q: Check MariaDB container was created
+CMD: docker-compose ps | grep mariadb
+
+Q: Verify MariaDB volume exists and points to correct path
+CMD: docker volume ls
+CMD: docker volume inspect mariadb | grep "/home/rmakoni/data"
+
+Q: Test root login should FAIL (no password should not work)
+CMD: docker-compose exec mariadb mysql -u root
+
+Q: Test user login with password should work
+CMD: docker-compose exec mariadb mysql -u wp_user -p
+
+Q: Verify database is not empty
+CMD: docker-compose exec mariadb mysql -u wp_user -p -e "SHOW DATABASES; USE wordpress_db; SHOW TABLES;"
+
+## Persistence Test
+# =================
+
+Q: Reboot virtual machine
+CMD: sudo reboot
+
+Q: After reboot, restart docker-compose
+CMD: make
+
+Q: Verify everything still works and WordPress changes persist
+CMD: curl -k https://rmakoni.42.fr
+CMD: # Manual test - check if previous changes are still there
+
+## USEFUL DEBUGGING COMMANDS
+# ==========================
+
+Q: Check all containers status
+CMD: docker-compose ps
+
+Q: View logs for all services
+CMD: docker-compose logs
+
+Q: View logs for specific service
+CMD: docker-compose logs nginx
+CMD: docker-compose logs wordpress  
+CMD: docker-compose logs mariadb
+
+Q: Execute shell in container
+CMD: docker-compose exec nginx /bin/bash
+CMD: docker-compose exec wordpress /bin/bash
+CMD: docker-compose exec mariadb /bin/bash
+
+Q: Check network connectivity between containers
+CMD: docker-compose exec wordpress ping mariadb
+CMD: docker-compose exec nginx ping wordpress
+
+Q: Verify environment variables are loaded
+CMD: docker-compose exec wordpress env | grep MYSQL
+CMD: docker-compose exec mariadb env | grep db_
+
+Q: Check volume mounts
+CMD: docker-compose exec wordpress ls -la /var/www/html
+CMD: docker-compose exec mariadb ls -la /var/lib/mysql
+
+Q: Test database connection from WordPress container
+CMD: docker-compose exec wordpress mysql -h mariadb -u wp_user -p
+
+## CLEANUP COMMANDS
+# =================
+
+Q: Stop all containers
+CMD: make down
+
+Q: Clean up containers and volumes
+CMD: make clean
+
+Q: Complete cleanup
+CMD: make fclean
