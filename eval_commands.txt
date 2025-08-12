@@ -142,13 +142,13 @@ CMD: docker volume ls
 CMD: docker volume inspect mariadb | grep "/home/rmakoni/data"
 
 Q: Test root login should FAIL (no password should not work)
-CMD: docker-compose exec mariadb mysql -u root
+CMD: docker compose exec mariadb mysql -u root
 
 Q: Test user login with password should work
-CMD: docker-compose exec mariadb mysql -u wp_user -p
+CMD: docker compose exec mariadb mysql -u wp_user -p
 
 Q: Verify database is not empty
-CMD: docker-compose exec mariadb mysql -u wp_user -p -e "SHOW DATABASES; USE wordpress_db; SHOW TABLES;"
+CMD: docker compose exec mariadb mysql -u wp_user -p -e "SHOW DATABASES; USE wordpress_db; SHOW TABLES;"
 
 ## Persistence Test
 # =================
